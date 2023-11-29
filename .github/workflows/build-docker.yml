@@ -3,9 +3,8 @@ name: Build - Docker
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ $default-branch ]
   pull_request:
+  push:
     branches: [ $default-branch ]
 
 env:
