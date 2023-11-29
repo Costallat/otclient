@@ -59,7 +59,6 @@ jobs:
       - name: Run CMake
         uses: lukka/run-cmake@v10
         with:
-          runVcpkgInstall: true
           configurePreset: ${{ matrix.buildtype }}
           buildPreset: ${{ matrix.buildtype }}
 
