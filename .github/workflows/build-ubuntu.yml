@@ -30,8 +30,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@main
-        with:
-          path: 'otc'
 
       - name: Install Linux Dependencies
         run: >
@@ -43,10 +41,17 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 --slave /usr/bin/g++ g++ /usr/bin/g++-11 --slave /usr/bin/gcov gcov /usr/bin/gcov-12
           sudo update-alternatives --set gcc /usr/bin/gcc-11
 
+      - name: Restore artifacts and install vcpkg
+        id: vcpkg-step
+        run: |
+          vcpkgCommitId=$(grep '.builtin-baseline' vcpkg.json | awk -F: '{print $2}' | tr -d '," ')
+          echo "vcpkg commit ID: $vcpkgCommitId"
+          echo "::set-output name=vcpkgGitCommitId::$vcpkgCommitId"
+
       - name: Get vcpkg commit id from vcpkg.json
-        uses: lukka/run-vcpkg@v11
+        uses: lukka/run-vcpkg@main
         with:
-          vcpkgJsonGlob: ${{ github.workspace }}/**/vcpkg.json
+          vcpkgGitCommitId: ${{ steps.vcpkg-step.outputs.vcpkgGitCommitId }}
 
       - name: Get latest CMake and ninja
         uses: lukka/get-cmake@latest
