@@ -9,8 +9,7 @@ on:
       - main
 
 env:
-  CMAKE_BUILD_PARALLEL_LEVEL: 2
-  MAKEFLAGS: '-j 2'
+  VCPKG_ENABLE_METRICS: 1
 
 jobs:
   job:
@@ -33,7 +32,7 @@ jobs:
         uses: actions/checkout@main
 
       - name: Install Linux Dependencies
-        run: > 
+        run: >
           sudo apt-get update && sudo apt-get install ccache libglew-dev libx11-dev linux-headers-$(uname -r)
 
       - name: Switch to gcc-11
@@ -42,26 +41,8 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100 --slave /usr/bin/g++ g++ /usr/bin/g++-11 --slave /usr/bin/gcov gcov /usr/bin/gcov-12
           sudo update-alternatives --set gcc /usr/bin/gcc-11
 
-      - name: CCache
-        uses: hendrikmuhs/ccache-action@main
-        with:
-          max-size: "1G"
-          key: ccache-${{ matrix.os }}-${{ matrix.buildtype }}
-          restore-keys: |
-            ccache-${{ matrix.os }}
-
-      - name: Restore artifacts and install vcpkg
-        id: vcpkg-step
-        run: |
-          vcpkgCommitId=$(grep '.builtin-baseline' vcpkg.json | awk -F: '{print $2}' | tr -d '," ')
-          echo "vcpkg commit ID: $vcpkgCommitId"
-          echo "::set-output name=vcpkgGitCommitId::$vcpkgCommitId"
-
       - name: Get vcpkg commit id from vcpkg.json
         uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgGitURL: "https://github.com/microsoft/vcpkg.git"
-          vcpkgGitCommitId: ${{ steps.vcpkg-step.outputs.vcpkgGitCommitId }}
 
       - name: Get latest CMake and ninja
         uses: lukka/get-cmake@latest
@@ -69,7 +50,7 @@ jobs:
       - name: Run CMake
         uses: lukka/run-cmake@v10
         with:
-          configurePresetAdditionalArgs: "[ '-DCMAKE_C_COMPILER_LAUNCHER=ccache', '-DCMAKE_CXX_COMPILER_LAUNCHER=ccache' ]"
+          runVcpkgInstall: true
           configurePreset: ${{ matrix.buildtype }}
           buildPreset: ${{ matrix.buildtype }}
 
