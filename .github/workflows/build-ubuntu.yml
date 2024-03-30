@@ -54,10 +54,10 @@ jobs:
           vcpkgGitCommitId: ${{ steps.vcpkg-step.outputs.vcpkgGitCommitId }}
 
       - name: Get latest CMake and ninja
-        uses: lukka/get-cmake@main
+        uses: lukka/get-cmake@latest
 
       - name: Run CMake
-        uses: lukka/run-cmake@main
+        uses: lukka/run-cmake@v10
         with:
           configurePreset: ${{ matrix.buildtype }}
           buildPreset: ${{ matrix.buildtype }}
